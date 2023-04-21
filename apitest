@@ -1,0 +1,49 @@
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.*;
+import static org.testng.Assert.assertEquals;
+
+public class ApiTests {
+
+    @Test
+    public void statuscode () {
+        int stcode=(
+                given()
+                .queryParam("ISBN","9781449325862")
+                .when()
+                .get("https://bookstore.toolsqa.com/BookStore/v1/Books")
+                .getStatusCode());
+        System.out.println("The response status is "+stcode);
+        assertEquals(stcode,200);
+    }
+
+    @Test
+    public void getisbn (){
+        String isbn=
+                given()
+                        .queryParam("ISBN","9781593277574")
+                        .when()
+                        .get("https://bookstore.toolsqa.com/BookStore/v1/Book")
+                        .then().
+                        log().all()
+                        .extract()
+                        .jsonPath().getString("isbn");
+        System.out.println(isbn);
+        assertEquals(isbn, "9781593277574");
+
+    }
+
+    @Test
+    public void bookpages(){
+            Response response = RestAssured.get("https://bookstore.toolsqa.com/BookStore/v1/Book");
+            JsonPath json = response.jsonPath();
+            int firstBookPageCount = json.getInt("books[0].page_count");
+            Assert.assertEquals(firstBookPageCount, 234);
+            int secondBookPageCount = json.getInt("books[1].page_count");
+            Assert.assertEquals(secondBookPageCount, 254);
+
+    }
+}
